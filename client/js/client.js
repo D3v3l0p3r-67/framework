@@ -34,10 +34,9 @@ const Framework = (() => {
         },
 
         queryStringParamsToObject(queryString) {
-            return queryString.split('&').reduce((acc, pair) => {
-                const [key, value] = pair.split('=');
-                acc[key] = decodeURIComponent(value);
-                return acc;
+            return Array.from(new URLSearchParams(queryString)).reduce((params, [key, value]) => {
+                params[key] = value;
+                return params;
             }, {});
         },
     };
