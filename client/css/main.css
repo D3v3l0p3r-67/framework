@@ -1,0 +1,568 @@
+/*start : sticky footer*/
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+  background-color: #f8fcfc;
+}
+
+.p0,
+.p0 div.col {
+  padding: 0;
+}
+
+/*end : sticky footer*/
+/*
+#content,
+nav {
+    width: 500px;
+}
+
+#content {
+    margin: 0 auto;
+}
+*/
+.page-footer {
+  padding-top: 0px;
+}
+
+#main-content {
+  padding-top: 50px;
+}
+
+.no-border {
+  border: none !important;
+}
+
+.collapsible {
+  border: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
+.collapsible-body-compact {
+  padding: 0 !important;
+}
+
+nav,
+.page-footer {
+  color: #fff;
+  background-color: #26a69a;
+}
+
+.collection a.collection-item:not(.active):hover {
+  background-color: #26a69a;
+  color: white;
+}
+
+.collection-item {
+  padding: 10px !important;
+}
+
+/* obračun */
+.section-header {
+  font-weight: bold;
+  color: #0097a7;
+  background-color: #bfe5e9;
+  padding: 1rem 0.5rem 1rem 0.5rem;
+}
+
+.collapsible-body {
+  padding: 1rem 0 0 0;
+  border-bottom: none;
+  background-color: white;
+}
+
+.row {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.input-field {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+input[type="number"] {
+  text-align: right;
+}
+
+.toolbar-title {
+  font-size: 2rem;
+  padding-left: 10px;
+}
+
+.collapsible-images {
+  text-align: left;
+}
+
+.w100,
+.collapsible-images img {
+  width: 100%;
+}
+
+table .material-icons {
+  margin-right: 1rem;
+  margin-left: 0.5rem;
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: #ffffff;
+  color: #9e9e9e;
+}
+
+.title-header {
+  width: 100%;
+}
+
+.icon-header {
+  font-weight: bold;
+  color: #0097a7;
+  margin-right: 0.5rem;
+  float: right;
+}
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:active {
+  color: #212121;
+}
+
+.login-form {
+  margin: 0 auto;
+  max-width: 1280px;
+  width: 90%;
+  padding-top: 1rem;
+}
+
+/* Customize the look of the confirmation dialog */
+.toast {
+  background-color: #0097a7;
+  padding: 10px;
+}
+
+.toast-message {
+  color: white !important;
+}
+
+.toast-answer-no {
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  color: white !important;
+  padding-left: 25px;
+}
+
+.toast-answer-yes {
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  color: white !important;
+  padding-right: 15px;
+  float: right;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.collapsible-header {
+  border-bottom: 1px solid #a3dadf !important;
+  box-shadow: 0px 2px 5px 0 rgb(0 0 0 / 15%);
+  /* box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2); */
+  /* sticky start */
+  position: sticky;
+  top: 64px;
+  z-index: 100;
+  /* sticky end */
+}
+
+.collapsible-header i {
+  margin-right: 0.5rem;
+}
+
+.form-submit-icon {
+  margin-right: 0.2rem !important;
+  margin-left: 0.5rem !important;
+  color: #0097a7;
+}
+
+.table-results td,
+.table-results th {
+  padding: 1rem !important;
+}
+
+.table-results tr td:last-child a i {
+  float: right;
+  margin-right: 0;
+  color: #0097a7;
+}
+
+.table-results tr td:nth-child(2) {
+  text-align: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.table-caption {
+  font-weight: bold;
+  color: #0097a7;
+  background-color: #bfe5e9;
+  border-top: 1px solid #0097a7;
+  border-bottom: 1px solid #0097a7;
+}
+
+.login-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  max-width: 400px;
+}
+
+.padding-normal {
+  padding: 1rem;
+}
+
+body,
+nav,
+footer {
+  position: relative;
+}
+
+.hide {
+  display: hidden;
+}
+
+/*
+body,
+nav,
+.page-footer,
+.collapsible-header {
+    background-image: url('../images/shadow-left.png'), url('../images/shadow-right.png');
+    background-repeat: repeat-y, repeat-y;
+    background-position: left, right;
+}
+*/
+
+/*must be fixed because of sticky collapsible header*/
+
+.width-full {
+  width: 100%;
+}
+
+.col .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.toast.message-error {
+  background-color: #a71000;
+}
+
+.toast.message-user {
+  background-color: #0097a7;
+}
+
+.toast.message-log {
+  background-color: #a9a9a9;
+}
+
+.padding-1rem {
+  padding: 1rem;
+}
+
+.collapsible-images img {
+  width: 100%;
+}
+
+.sidenav-link a {
+  padding: 0 10px !important;
+}
+
+.sidenav-link a i {
+  margin-right: 10px !important;
+}
+
+.sidenav .divider {
+  margin-top: 0 !important;
+}
+
+.background img {
+  width: 100%;
+}
+
+.menu-item {
+  width: 54px;
+}
+.menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 54px;
+}
+
+/*
+.navbar-fixed,
+.navbar-fixed nav {
+  height: 56px !important;
+  max-height: 56px !important;
+  min-height: 56px !important;
+  line-height: 56px;
+}
+
+
+nav a {
+  margin: 0 10px !important;
+}
+
+.menu {
+  margin-right: 10px;
+}
+
+.menu a {
+  padding-right: 0px;
+  margin-right: 6px !important;
+  margin-left: 0px !important;
+}
+
+#menu-dropdown a {
+  margin-right: 12px !important;
+}
+
+#menu-dropdown a i {
+  margin-right: 12px !important;
+}
+*/
+
+/*https://materializecss.com/sidenav.html*/
+
+/*header, footer,*/
+footer,
+main {
+  padding-left: 300px;
+}
+#login {
+  padding-right: 300px;
+}
+
+@media only screen and (max-width: 992px) {
+  /*header, footer,*/
+  footer,
+  main {
+    padding-left: 0;
+  }
+  #login {
+    padding-right: 0;
+  }
+}
+
+.fancy-text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2),
+    /* Soft outer shadow */ 0px 0px 10px rgba(0, 150, 136, 0.4); /* Teal glow */
+  color: #212121; /* Dark grey text color (MaterializeCSS default) */
+}
+.circle {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+    0px 0px 15px rgba(0, 150, 136, 0.4);
+}
+
+.sticky-toolbar {
+  position: sticky;
+  top: 35px;
+  z-index: 996;
+  background-color: white;
+}
+
+/*scroller*/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dropdown-content::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fcfc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9c9c9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0097a7;
+}
+
+/* compact sidenav */
+.user-view {
+  display: flex;
+}
+.sidenav .user-view {
+  padding: 18px;
+}
+.sidenav .user-view > a {
+  padding-right: 16px;
+}
+.sidenav .user-view .email {
+  padding-bottom: 0;
+}
+
+table a {
+  color: #0097a7 !important;
+  font-weight: 500;
+}
+
+#login-submit:hover {
+  color: white;
+}
+
+/* RO TEXT NAJ BO ISTE BARVE KOT WR, LE ČRTA JE DRUGAČNA*/
+input:not([type]):disabled,
+input:not([type])[readonly="readonly"],
+input[type="text"]:not(.browser-default):disabled,
+input[type="text"]:not(.browser-default)[readonly="readonly"],
+input[type="password"]:not(.browser-default):disabled,
+input[type="password"]:not(.browser-default)[readonly="readonly"],
+input[type="email"]:not(.browser-default):disabled,
+input[type="email"]:not(.browser-default)[readonly="readonly"],
+input[type="url"]:not(.browser-default):disabled,
+input[type="url"]:not(.browser-default)[readonly="readonly"],
+input[type="time"]:not(.browser-default):disabled,
+input[type="time"]:not(.browser-default)[readonly="readonly"],
+input[type="date"]:not(.browser-default):disabled,
+input[type="date"]:not(.browser-default)[readonly="readonly"],
+input[type="datetime"]:not(.browser-default):disabled,
+input[type="datetime"]:not(.browser-default)[readonly="readonly"],
+input[type="datetime-local"]:not(.browser-default):disabled,
+input[type="datetime-local"]:not(.browser-default)[readonly="readonly"],
+input[type="tel"]:not(.browser-default):disabled,
+input[type="tel"]:not(.browser-default)[readonly="readonly"],
+input[type="number"]:not(.browser-default):disabled,
+input[type="number"]:not(.browser-default)[readonly="readonly"],
+input[type="search"]:not(.browser-default):disabled,
+input[type="search"]:not(.browser-default)[readonly="readonly"],
+textarea.materialize-textarea:disabled,
+textarea.materialize-textarea[readonly="readonly"] {
+  color: rgba(0, 0, 0, 1); /*original 0.42*/
+}
+
+/* za search */
+/* Initial hidden state */
+.hidden {
+  display: none;
+  opacity: 0;
+  height: 0;
+  overflow: hidden; /* Hide content when height is reduced */
+  transition: opacity 0.5s ease, height 0.5s ease; /* Animate opacity and height */
+}
+
+/*
+GRID MAX WIDTH
+*/
+.GW200 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 1.2em;
+  line-height: 1.2em;
+  max-width: 200px;
+}
+
+/* Shown state */
+.visible {
+  display: block;
+  opacity: 1;
+  height: auto; /* Expand to the full height */
+}
+
+/*tabs*/
+.sticky-tabs {
+  position: sticky;
+  top: 0; /* Stick to the top of the page */
+  z-index: 997; /* Ensure it stays on top of other elements */
+  background-color: white; /* Optional: Set background color to prevent content overlap */
+}
+/*
+.tabs .tab a:focus,
+.tabs .tab a:focus.active {
+  background-color: rgb(0 151 167 / 20%) !important;
+}
+*/
+.tab-button {
+  text-transform: none;
+  box-shadow: none;
+  background-color: white;
+  border-bottom-right-radius: 0;
+  padding: 0 25px;
+  line-height: 1rem;
+
+  color: rgba(0, 0, 0, 0.54); /* rgba(0, 0, 0, 0.87); */
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#tab-container_buttons {
+  background-color: #97d4dc;
+}
+
+.tab-button,
+.tab-button.active,
+.tab-button:hover,
+.tab-button:focus {
+  box-shadow: none;
+  background-color: #97d4dc;
+  color: white;
+}
+.tab-button:hover {
+  color: #212121;
+}
+.tab-button.active {
+  padding-right: 15px;
+  color: #212121;
+}
+
+.tab-component-static .tab-button.active {
+  padding-right: 25px;
+}
+
+.tabs .tab a,
+.tabs .tab a:hover,
+.tabs .tab a.active {
+  color: rgb(0 151 167 / 100%) !important;
+}
+
+.tab-button .close-btn {
+  padding-left: 5px;
+  padding-right: 5px;
+  width: 10px;
+  display: none; /* Hide the close icon by default */
+}
+
+.tab-button.active .close-btn {
+  display: inline-block;
+}
+.tab-button.active .close-btn i.material-icons {
+  color: white !important;
+}
+
+.tab-button .close-btn i.material-icons {
+  font-size: 1rem;
+}
+
+#tab-container_buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+}

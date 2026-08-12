@@ -1,0 +1,32 @@
+body,
+.collection .collection-item {
+    background-color: white;
+}
+
+.active-item,
+.teal.lighten-1,
+nav,
+.page-footer,
+.footer-copyright,
+.collection a.collection-item:not(.active):hover {
+    color: #f1f1f1 !important;
+    background-color: #0097A7 !important;
+}
+
+.collection .collection-item {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.input-field,
+.collection a.collection-item {
+    color: #929292;
+}
+
+input[type=search] {
+    border-bottom: 1px solid #e0e0e0 !important;
+    box-shadow: 0 0 0 0 !important;
+}
+input[type=search]:focus {
+    border-bottom: 1px solid #0097A7 !important;
+    box-shadow: 0 0 0 0 !important;
+}
