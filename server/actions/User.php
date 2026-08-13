@@ -18,6 +18,7 @@ class User
         $this->session = new Session();
     }
 
+    #[Action]
     public function Logout()
     {
         $session = new Session();
@@ -47,6 +48,7 @@ class User
         return $isAdmin;
     }
 
+    #[Action]
     public function GetData()
     {
         /*
@@ -67,17 +69,17 @@ class User
         );
     }
 
+    #[Action]
     public function Login($data)
     {
         if (Authenticator::isAuthenticated()) {
-            return  ResponseFactory::CreateError(
-                code: 500,
-                messages: new MessageArray([new MessageError('You are already logged in.')]),
+            return ResponseFactory::CreateConflict(
+                message: new MessageError('You are already logged in.'),
                 data: $this->GetDataFromSession()
             );
         } else {
-            $username = $data['username'];
-            $password = $data['password'];
+            $username = $data['username'] ?? null;
+            $password = $data['password'] ?? null;
 
             if (
                 isset($username) && !empty($username) &&
@@ -86,15 +88,12 @@ class User
                 $user =  $this->db->row(
                     'SELECT * 
                     FROM fw_user 
-                    WHERE username = ? and 
-                        password = ?',
-                    [$username, $password]
+                    WHERE username = ?',
+                    [$username]
                 );
 
-                if ($user) {
-                    //$token = Utils::generateGuid();
-                    //$expired =  (new DateTime())->add(new DateInterval('P1D')); //+1day
-
+                if ($user && password_verify($password, $user->password)) {
+                    $this->session->regenerateId();
                     $this->session->setUserId($user->id);
                     $this->session->setUsername($user->username);
                     $this->session->setEmail($user->email);
@@ -103,7 +102,6 @@ class User
                     return  ResponseFactory::CreateOk(
                         message: new MessageUser('You have been successfully logged in'),
                         refresh: true
-                        //data: array("accessToken" => $token)
                     );
                 }
             }
@@ -128,6 +126,7 @@ class User
         );
     }
 
+    #[Action]
     public function Profile()
     {
         $user_id =  $this->session->getUserId();

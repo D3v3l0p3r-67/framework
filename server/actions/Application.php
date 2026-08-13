@@ -10,6 +10,7 @@ class Application extends DataBaseTableSessionAction
         $this->table = 'fw_application';
     }
 
+    #[Action]
     public function ColdStart($dataInput)
     {
         if(!isset($dataInput['id'])){

@@ -12,6 +12,14 @@ class Session
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
+            ini_set('session.use_strict_mode', '1');
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => '/',
+                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
             session_start();
         }
     }
@@ -100,7 +108,35 @@ class Session
 
     public function clear(): void
     {
-        session_unset();
+        $_SESSION = [];
+
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+        }
+
+        session_destroy();
+    }
+
+    public function regenerateId(): void
+    {
+        session_regenerate_id(true);
+    }
+
+    public function getCsrfToken(): string
+    {
+        $token = $this->get('csrf_token');
+        if (!is_string($token) || $token === '') {
+            $token = bin2hex(random_bytes(32));
+            $this->set('csrf_token', $token);
+        }
+
+        return $token;
+    }
+
+    public function isValidCsrfToken(?string $token): bool
+    {
+        return is_string($token) && hash_equals($this->getCsrfToken(), $token);
     }
 
     public function has(string $key): bool

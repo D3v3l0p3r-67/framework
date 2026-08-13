@@ -9,6 +9,7 @@ class Counter extends DataBaseTableAction
         $this->table = 'doc_counter';
     }
 
+    #[Action]
     public function GetPreviewData($this_settlement_id)
     {
         return $this->db->run(
@@ -26,6 +27,7 @@ class Counter extends DataBaseTableAction
     }
 
     //access by Fk - settlement_id (so filter)
+    #[Action]
     public function Show($dataInput)
     {
         //Get last settlement's data for placeholder
@@ -97,6 +99,7 @@ class Counter extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function Upsert($data)
     {
         $desiredFields = ['settlement_id', 'electricity_all', 'water_all', 'boiler_all', 'electricity_app2', 'electricity_app3'];

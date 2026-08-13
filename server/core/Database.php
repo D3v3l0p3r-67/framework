@@ -5,6 +5,8 @@ namespace Framework\Core;
 require_once('./core/Logger.php');
 
 use PDO;
+use PDOStatement;
+use Throwable;
 use Exception;
 use Framework\Core\LogLevel;
 
@@ -16,15 +18,15 @@ class Database
     /**
      * Hold database connection
      */
-    protected $db;
-    protected $logQueries = true;
+    protected PDO $db;
+    protected bool $logQueries = true;
 
     /**
      * Array of connection arguments
      * 
      * @param array $args
      */
-    public function __construct($args = [])
+    public function __construct(array $args = [])
     {
         $database = './database/main.db';
 
@@ -38,7 +40,7 @@ class Database
      * 
      * @return PDO instance
      */
-    public function getPdo()
+    public function getPdo(): PDO
     {
         return $this->db;
     }
@@ -49,9 +51,9 @@ class Database
      * @param string $sql SQL query
      * @return void
      */
-    public function raw($sql)
+    public function raw(string $sql): void
     {
-        $this->db->query($sql);
+        $this->db->exec($sql);
     }
 
     /**
@@ -61,7 +63,7 @@ class Database
      * @param array $args Params
      * @return PDOStatement returns a PDOStatement object
      */
-    public function run($sql, $args = [])
+    public function run(string $sql, array $args = []): PDOStatement
     {
         if (empty($args)) {
             return $this->db->query($sql);
@@ -87,7 +89,27 @@ class Database
         return $stmt;
     }
 
-    public function rows($sql, $args = [], $fetchMode = PDO::FETCH_OBJ)
+    /**
+     * Execute a unit of work atomically and return its result.
+     * Nested transactions are intentionally rejected by PDO.
+     */
+    public function transaction(callable $callback): mixed
+    {
+        $this->db->beginTransaction();
+
+        try {
+            $result = $callback($this);
+            $this->db->commit();
+            return $result;
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function rows(string $sql, array $args = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
         return $this->run($sql, $args)->fetchAll($fetchMode);
     }
@@ -97,61 +119,106 @@ class Database
         return $this->run($sql, $args)->fetch($fetchMode);
     }
 
-    public function getAll($table, $order = '', $filter = [], $fetchMode = PDO::FETCH_OBJ)
+    public function getAll(string $table, string $order = '', array $filter = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
         return $this->get($table, "*", $order, $filter, $fetchMode);
     }
 
-    public function get($table, $columns, $order = '', $filter = [], $fetchMode = PDO::FETCH_OBJ)
+    public function get(string $table, string $columns, string $order = '', array $filter = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
+        $this->assertIdentifier($table);
+        $this->assertColumnList($columns);
         $query = "SELECT $columns FROM $table";
+        $values = [];
 
         if (!empty($filter)) {
             $conditions = [];
             foreach ($filter as $column => $value) {
                 if ($column !== '') {
-                    $conditions[] = "$column = $value";
+                    $this->assertIdentifier($column);
+                    $conditions[] = "$column = ?";
+                    $values[] = $value;
                 }
             }
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
         if ($order !== '') {
+            $this->assertOrderBy($order);
             $query .= ' ORDER BY ' . $order;
         }
 
         $this->Log('Database.get: ' . $query);
 
-        return $this->run($query)->fetchAll($fetchMode);
+        return $this->run($query, $values)->fetchAll($fetchMode);
     }
 
     public function getByFilter($table, $filter = [], $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         $query = "SELECT * FROM $table";
+        $values = [];
 
         if (!empty($filter)) {
             $conditions = [];
             foreach ($filter as $column => $value) {
                 if ($column !== '') {
-                    $conditions[] = "$column = $value";
+                    $this->assertIdentifier($column);
+                    $conditions[] = "$column = ?";
+                    $values[] = $value;
                 }
             }
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        return $this->run($query)->fetch($fetchMode);
+        return $this->run($query, $values)->fetch($fetchMode);
+    }
+
+    private function assertIdentifier(string $identifier): void
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $identifier)) {
+            throw new Exception("Invalid SQL identifier: $identifier");
+        }
+    }
+
+    private function assertColumnList(string $columns): void
+    {
+        if ($columns === '*') {
+            return;
+        }
+
+        foreach (array_map('trim', explode(',', $columns)) as $column) {
+            $this->assertIdentifier($column);
+        }
+    }
+
+    private function assertOrderBy(string $order): void
+    {
+        foreach (array_map('trim', explode(',', $order)) as $expression) {
+            if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(?:\s+(?:ASC|DESC))?$/i', $expression)) {
+                throw new Exception("Invalid ORDER BY expression: $expression");
+            }
+        }
     }
     public function getById($table, $id, $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         return $this->run("SELECT * FROM $table WHERE id = ?", [$id])->fetch($fetchMode);
     }
     public function getByName($table, $name, $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         return $this->run("SELECT * FROM $table WHERE name = ?", [$name])->fetch($fetchMode);
     }
 
-    public function search($table, $search, $columns = null, $mode = 'OR', $fetchMode = PDO::FETCH_OBJ)
+    public function search(string $table, mixed $search, ?array $columns = null, string $mode = 'OR', int $fetchMode = PDO::FETCH_OBJ): array
     {
+        $this->assertIdentifier($table);
+        $mode = strtoupper($mode);
+        if (!in_array($mode, ['AND', 'OR'], true)) {
+            throw new Exception("Invalid search mode: $mode");
+        }
+
         if (empty($search)) {
             return [];
         }
@@ -168,6 +235,7 @@ class Database
         $values = [];
 
         foreach ($columns as $column) {
+            $this->assertIdentifier($column);
             $whereClause[] = "$column LIKE ?";
             $values[] = "%$search%";
         }
@@ -188,8 +256,10 @@ class Database
         return $this->db->lastInsertId();
     }
 
-    public function insert($table, $data)
+    public function insert(string $table, array $data): string
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($data);
         $columns = implode(',', array_keys($data));
         $values = array_values($data);
         $placeholders = implode(',', array_fill(0, count($data), '?'));
@@ -197,13 +267,15 @@ class Database
         $this->run($query, $values);
 
         $this->Log("query: " . $query);
-        $this->Log("values: " . print_r($values, true));
 
         return $this->lastInsertId();
     }
 
-    public function update($table, $data, $where)
+    public function update(string $table, array $data, array $where): int
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($data);
+        $this->assertDataKeys($where);
         $values = [];
 
         $fieldDetails = '';
@@ -225,8 +297,10 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function delete($table, $where, $limit = null)
+    public function delete(string $table, array $where, ?int $limit = null): int
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($where);
         $values = array_values($where);
         $whereDetails = '';
 
@@ -236,8 +310,11 @@ class Database
         $whereDetails = rtrim($whereDetails, ' AND ');
 
         $sql = "DELETE FROM $table WHERE $whereDetails";
-        if (is_numeric($limit)) {
-            $sql .= " LIMIT $limit";
+        if ($limit !== null) {
+            if ($limit < 1) {
+                throw new Exception('Delete limit must be a positive integer.');
+            }
+            $sql .= ' LIMIT ' . $limit;
         }
 
         $stmt = $this->run($sql, $values);
@@ -245,32 +322,60 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function deleteAll($table)
+    public function deleteAll(string $table): int
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
 
         return $stmt->rowCount();
     }
 
-    public function deleteById($table, $id)
+    public function deleteById(string $table, mixed $id): int
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table WHERE id = ?", [$id]);
 
         return $stmt->rowCount();
     }
 
-    public function deleteByIds(string $table, string $column, string $ids)
+    public function deleteByIds(string $table, string $column, array $ids): int
     {
-        $stmt = $this->run("DELETE FROM $table WHERE $column IN ($ids)");
+        $this->assertIdentifier($table);
+        $this->assertIdentifier($column);
+
+        if ($ids === []) {
+            return 0;
+        }
+
+        foreach ($ids as $id) {
+            if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
+                throw new Exception('Delete IDs must contain only integers.');
+            }
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->run("DELETE FROM $table WHERE $column IN ($placeholders)", array_values($ids));
 
         return $stmt->rowCount();
     }
 
-    public function truncate($table)
+    public function truncate(string $table): int
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
 
         return $stmt->rowCount();
+    }
+
+    private function assertDataKeys(array $data): void
+    {
+        if ($data === []) {
+            throw new Exception('Database data cannot be empty.');
+        }
+
+        foreach (array_keys($data) as $column) {
+            $this->assertIdentifier((string) $column);
+        }
     }
 
     protected function Log($message)
