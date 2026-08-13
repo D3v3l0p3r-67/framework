@@ -23,4 +23,13 @@ try {
     }
 }
 
+$loginFormFactory = new ReflectionMethod(Action::class, 'GetLoginFormResponse');
+$loginResponse = $loginFormFactory->invoke(null)->jsonSerialize();
+if ($loginResponse['statusCode'] !== 401 || $loginResponse['success'] !== false) {
+    throw new RuntimeException('Authentication challenge must use an HTTP 401 error response.');
+}
+if (!is_array($loginResponse['form']) || !str_contains($loginResponse['form']['template'] ?? '', 'User.Login')) {
+    throw new RuntimeException('Authentication challenge did not preserve the login form.');
+}
+
 echo "Action attribute tests passed.\n";

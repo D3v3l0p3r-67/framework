@@ -73,9 +73,8 @@ class User
     public function Login($data)
     {
         if (Authenticator::isAuthenticated()) {
-            return  ResponseFactory::CreateError(
-                code: 500,
-                messages: new MessageArray([new MessageError('You are already logged in.')]),
+            return ResponseFactory::CreateConflict(
+                message: new MessageError('You are already logged in.'),
                 data: $this->GetDataFromSession()
             );
         } else {
@@ -94,9 +93,6 @@ class User
                 );
 
                 if ($user && password_verify($password, $user->password)) {
-                    //$token = Utils::generateGuid();
-                    //$expired =  (new DateTime())->add(new DateInterval('P1D')); //+1day
-
                     $this->session->regenerateId();
                     $this->session->setUserId($user->id);
                     $this->session->setUsername($user->username);
@@ -106,7 +102,6 @@ class User
                     return  ResponseFactory::CreateOk(
                         message: new MessageUser('You have been successfully logged in'),
                         refresh: true
-                        //data: array("accessToken" => $token)
                     );
                 }
             }
