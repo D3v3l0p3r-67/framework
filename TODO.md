@@ -5,6 +5,7 @@
 - Revisit the anonymous `Session::getUserId()` fallback value (`2`). Changing it to `null` requires an audit of all callers.
 - Rotate all migrated user passwords: their former plaintext values remain recoverable from Git history even though the live database now contains hashes.
 - Replace the current file logger with structured audit events and a retention policy.
+- Restrict `SqlEditor.ExecuteQuery` to an explicit administrator-only action policy; this changes existing authorization behavior and needs approval before implementation.
 
 ## Client
 

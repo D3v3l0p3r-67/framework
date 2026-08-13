@@ -75,26 +75,6 @@ class Action
 
         throw new HttpException("Action '$actionKey' was not found.", 404);
     }
-
-    private static function AssertExposedAction(ReflectionMethod $method, string $actionKey): void
-    {
-        if ($method->getAttributes(self::class) !== []) {
-            return;
-        }
-
-        $config = file_exists('./config.local.php') ? require './config.local.php' : [];
-        $auditMode = filter_var(
-            $config['app']['action_audit'] ?? (getenv('ACTION_AUDIT') ?: false),
-            FILTER_VALIDATE_BOOL
-        );
-
-        if ($auditMode) {
-            Logger::Write("Unattributed action executed in audit mode: $actionKey", LogLevel::WARNING);
-            return;
-        }
-
-        throw new HttpException("Action '$actionKey' was not found.", 404);
-    }
     private static function IsLoginActionKey($actionKey)
     {
         return "User.Login" == $actionKey;

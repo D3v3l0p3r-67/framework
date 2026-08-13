@@ -51,6 +51,39 @@ try {
     }
 }
 
+$transactionResult = $database->transaction(function (Database $database): string {
+    $database->insert('items', ['name' => 'committed', 'position' => 4]);
+    return 'result';
+});
+if ($transactionResult !== 'result' || !$database->getByFilter('items', ['name' => 'committed'])) {
+    throw new RuntimeException('Transaction did not commit or return its callback result.');
+}
+
+try {
+    $database->transaction(function (Database $database): void {
+        $database->insert('items', ['name' => 'rolled-back', 'position' => 5]);
+        throw new RuntimeException('rollback');
+    });
+} catch (RuntimeException $exception) {
+    if ($exception->getMessage() !== 'rollback') {
+        throw $exception;
+    }
+}
+if ($database->getByFilter('items', ['name' => 'rolled-back'])) {
+    throw new RuntimeException('Transaction did not roll back after an exception.');
+}
+
+foreach ([0, -1] as $invalidLimit) {
+    try {
+        $database->delete('items', ['name' => 'committed'], $invalidLimit);
+        throw new RuntimeException('Invalid delete limit was accepted.');
+    } catch (Exception $exception) {
+        if ($exception->getMessage() !== 'Delete limit must be a positive integer.') {
+            throw $exception;
+        }
+    }
+}
+
 try {
     $database->getAll('items; DROP TABLE items');
     throw new RuntimeException('Unsafe identifiers were accepted.');

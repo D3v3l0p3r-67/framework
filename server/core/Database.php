@@ -5,6 +5,8 @@ namespace Framework\Core;
 require_once('./core/Logger.php');
 
 use PDO;
+use PDOStatement;
+use Throwable;
 use Exception;
 use Framework\Core\LogLevel;
 
@@ -16,15 +18,15 @@ class Database
     /**
      * Hold database connection
      */
-    protected $db;
-    protected $logQueries = true;
+    protected PDO $db;
+    protected bool $logQueries = true;
 
     /**
      * Array of connection arguments
      * 
      * @param array $args
      */
-    public function __construct($args = [])
+    public function __construct(array $args = [])
     {
         $database = './database/main.db';
 
@@ -38,7 +40,7 @@ class Database
      * 
      * @return PDO instance
      */
-    public function getPdo()
+    public function getPdo(): PDO
     {
         return $this->db;
     }
@@ -49,9 +51,9 @@ class Database
      * @param string $sql SQL query
      * @return void
      */
-    public function raw($sql)
+    public function raw(string $sql): void
     {
-        $this->db->query($sql);
+        $this->db->exec($sql);
     }
 
     /**
@@ -61,7 +63,7 @@ class Database
      * @param array $args Params
      * @return PDOStatement returns a PDOStatement object
      */
-    public function run($sql, $args = [])
+    public function run(string $sql, array $args = []): PDOStatement
     {
         if (empty($args)) {
             return $this->db->query($sql);
@@ -87,7 +89,27 @@ class Database
         return $stmt;
     }
 
-    public function rows($sql, $args = [], $fetchMode = PDO::FETCH_OBJ)
+    /**
+     * Execute a unit of work atomically and return its result.
+     * Nested transactions are intentionally rejected by PDO.
+     */
+    public function transaction(callable $callback): mixed
+    {
+        $this->db->beginTransaction();
+
+        try {
+            $result = $callback($this);
+            $this->db->commit();
+            return $result;
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function rows(string $sql, array $args = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
         return $this->run($sql, $args)->fetchAll($fetchMode);
     }
@@ -97,12 +119,12 @@ class Database
         return $this->run($sql, $args)->fetch($fetchMode);
     }
 
-    public function getAll($table, $order = '', $filter = [], $fetchMode = PDO::FETCH_OBJ)
+    public function getAll(string $table, string $order = '', array $filter = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
         return $this->get($table, "*", $order, $filter, $fetchMode);
     }
 
-    public function get($table, $columns, $order = '', $filter = [], $fetchMode = PDO::FETCH_OBJ)
+    public function get(string $table, string $columns, string $order = '', array $filter = [], int $fetchMode = PDO::FETCH_OBJ): array
     {
         $this->assertIdentifier($table);
         $this->assertColumnList($columns);
@@ -189,7 +211,7 @@ class Database
         return $this->run("SELECT * FROM $table WHERE name = ?", [$name])->fetch($fetchMode);
     }
 
-    public function search($table, $search, $columns = null, $mode = 'OR', $fetchMode = PDO::FETCH_OBJ)
+    public function search(string $table, mixed $search, ?array $columns = null, string $mode = 'OR', int $fetchMode = PDO::FETCH_OBJ): array
     {
         $this->assertIdentifier($table);
         $mode = strtoupper($mode);
@@ -234,7 +256,7 @@ class Database
         return $this->db->lastInsertId();
     }
 
-    public function insert($table, $data)
+    public function insert(string $table, array $data): string
     {
         $this->assertIdentifier($table);
         $this->assertDataKeys($data);
@@ -249,7 +271,7 @@ class Database
         return $this->lastInsertId();
     }
 
-    public function update($table, $data, $where)
+    public function update(string $table, array $data, array $where): int
     {
         $this->assertIdentifier($table);
         $this->assertDataKeys($data);
@@ -275,7 +297,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function delete($table, $where, $limit = null)
+    public function delete(string $table, array $where, ?int $limit = null): int
     {
         $this->assertIdentifier($table);
         $this->assertDataKeys($where);
@@ -288,8 +310,11 @@ class Database
         $whereDetails = rtrim($whereDetails, ' AND ');
 
         $sql = "DELETE FROM $table WHERE $whereDetails";
-        if (is_numeric($limit)) {
-            $sql .= ' LIMIT ' . (int) $limit;
+        if ($limit !== null) {
+            if ($limit < 1) {
+                throw new Exception('Delete limit must be a positive integer.');
+            }
+            $sql .= ' LIMIT ' . $limit;
         }
 
         $stmt = $this->run($sql, $values);
@@ -297,7 +322,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function deleteAll($table)
+    public function deleteAll(string $table): int
     {
         $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
@@ -305,7 +330,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function deleteById($table, $id)
+    public function deleteById(string $table, mixed $id): int
     {
         $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table WHERE id = ?", [$id]);
@@ -313,7 +338,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function deleteByIds(string $table, string $column, array $ids)
+    public function deleteByIds(string $table, string $column, array $ids): int
     {
         $this->assertIdentifier($table);
         $this->assertIdentifier($column);
@@ -334,7 +359,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function truncate($table)
+    public function truncate(string $table): int
     {
         $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
