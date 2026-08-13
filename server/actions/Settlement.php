@@ -9,6 +9,7 @@ class Settlement extends DataBaseTableAction
         $this->table = 'doc_settlement';
     }
 
+    #[Action]
     public function DeleteAndShowGrid($Data)
     {
         self::Delete($Data);
@@ -16,6 +17,7 @@ class Settlement extends DataBaseTableAction
     }
 
     //TODO: Pass different Message
+    #[Action]
     public function CreateAndShowGrid($dataInput)
     {
         self::Create($dataInput);
@@ -23,12 +25,14 @@ class Settlement extends DataBaseTableAction
     }
 
     //TODO: Pass different Message
+    #[Action]
     public function CreateAndShow($dataInput)
     {
         $dataOutput = self::Create($dataInput);
         return self::Show($dataOutput);
     }
 
+    #[Action]
     public function Create($dataInput)
     {
         //fet data from db
@@ -115,6 +119,7 @@ class Settlement extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function Show($data)
     {
         $dataOutput = $this->db->getById($this->table, $data['id']);
@@ -228,6 +233,7 @@ class Settlement extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function Grid()
     {
         return ResponseFactory::CreateOk(

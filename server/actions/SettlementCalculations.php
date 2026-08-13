@@ -8,6 +8,7 @@ class SettlementCalculations extends DataBaseAction
         parent::__construct();
     }
 
+    #[Action]
     public function GetConsumptionsData($dataInput)
     {
         $t = $this->db->run(
@@ -54,6 +55,7 @@ class SettlementCalculations extends DataBaseAction
         return $r;
     }
 
+    #[Action]
     public function GetPriceListData($dataInput)
     {
         $t = $this->db->run(
@@ -64,6 +66,7 @@ class SettlementCalculations extends DataBaseAction
 
         return $t;
     }
+    #[Action]
     public function GetCostsData($dataInput)
     {
         $t = self::GetConsumptionsData($dataInput);
@@ -94,6 +97,7 @@ class SettlementCalculations extends DataBaseAction
     }
 
     //Poraba
+    #[Action]
     public function Consumptions($dataInput)
     {
         return ResponseFactory::CreateOk(
@@ -175,6 +179,7 @@ class SettlementCalculations extends DataBaseAction
     }
 
     //Poraba
+    #[Action]
     public function Costs($dataInput)
     {
         return ResponseFactory::CreateOk(
@@ -232,6 +237,7 @@ class SettlementCalculations extends DataBaseAction
     }
 
 
+    #[Action]
     public function GetPaymentsData($dataInput)
     {
         $c1 = self::GetConsumptionsData($dataInput);
@@ -258,6 +264,7 @@ class SettlementCalculations extends DataBaseAction
         return $r;
     }
     //Poraba
+    #[Action]
     public function Payments($dataInput)
     {
         return ResponseFactory::CreateOk(
@@ -297,6 +304,7 @@ class SettlementCalculations extends DataBaseAction
         );
     }
 
+    #[Action]
     public function Instructions()
     {
         return ResponseFactory::CreateOk(

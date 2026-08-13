@@ -13,7 +13,7 @@ class FormFactory
     public static function GetFormTemplate($name): string
     {
         $db = new Database();
-        $form = $db->getByFilter('ApdForm', ['name' => '"' . $name . '"']);
+        $form = $db->getByFilter('ApdForm', ['name' => $name]);
 
         $template = $form->definition ?? 'Form not found!';
 
@@ -34,7 +34,7 @@ class FormFactory
     private static function getDetailsForFormName($name)
     {
         $db = new Database();
-        $form = $db->getByFilter('ApdForm', ['name' => '"' . $name . '"']);
+        $form = $db->getByFilter('ApdForm', ['name' => $name]);
         $masterTypeId = $form->id ?? 0;
 
         return self::getDetails($masterTypeId);
@@ -44,7 +44,7 @@ class FormFactory
     {
         $db = new Database();
 
-        $details = $db->getAll('ApdDetail', 'position', ['form_id' => '"' . $masterFormId . '"']);
+        $details = $db->getAll('ApdDetail', 'position', ['form_id' => $masterFormId]);
 
         $result = '<div id="tab-component-static-{{random}}" class="tab-component-static">';
 

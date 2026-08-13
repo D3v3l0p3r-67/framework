@@ -35,4 +35,9 @@ foreach ($factories as $factory => $expectedStatus) {
 $responseWithoutMessages = ResponseFactory::CreateError(code: 500);
 assertSameValue([], $responseWithoutMessages->jsonSerialize()['messages']->getArrayCopy(), 'Missing messages were not normalized');
 
+ob_start();
+ResponseFactory::CreateBadRequest()->SendAsJson();
+ob_end_clean();
+assertSameValue(400, http_response_code(), 'The response did not set its real HTTP status code');
+
 echo "ResponseFactory tests passed.\n";

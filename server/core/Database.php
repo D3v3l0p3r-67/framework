@@ -104,54 +104,99 @@ class Database
 
     public function get($table, $columns, $order = '', $filter = [], $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
+        $this->assertColumnList($columns);
         $query = "SELECT $columns FROM $table";
+        $values = [];
 
         if (!empty($filter)) {
             $conditions = [];
             foreach ($filter as $column => $value) {
                 if ($column !== '') {
-                    $conditions[] = "$column = $value";
+                    $this->assertIdentifier($column);
+                    $conditions[] = "$column = ?";
+                    $values[] = $value;
                 }
             }
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
         if ($order !== '') {
+            $this->assertOrderBy($order);
             $query .= ' ORDER BY ' . $order;
         }
 
         $this->Log('Database.get: ' . $query);
 
-        return $this->run($query)->fetchAll($fetchMode);
+        return $this->run($query, $values)->fetchAll($fetchMode);
     }
 
     public function getByFilter($table, $filter = [], $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         $query = "SELECT * FROM $table";
+        $values = [];
 
         if (!empty($filter)) {
             $conditions = [];
             foreach ($filter as $column => $value) {
                 if ($column !== '') {
-                    $conditions[] = "$column = $value";
+                    $this->assertIdentifier($column);
+                    $conditions[] = "$column = ?";
+                    $values[] = $value;
                 }
             }
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        return $this->run($query)->fetch($fetchMode);
+        return $this->run($query, $values)->fetch($fetchMode);
+    }
+
+    private function assertIdentifier(string $identifier): void
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $identifier)) {
+            throw new Exception("Invalid SQL identifier: $identifier");
+        }
+    }
+
+    private function assertColumnList(string $columns): void
+    {
+        if ($columns === '*') {
+            return;
+        }
+
+        foreach (array_map('trim', explode(',', $columns)) as $column) {
+            $this->assertIdentifier($column);
+        }
+    }
+
+    private function assertOrderBy(string $order): void
+    {
+        foreach (array_map('trim', explode(',', $order)) as $expression) {
+            if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(?:\s+(?:ASC|DESC))?$/i', $expression)) {
+                throw new Exception("Invalid ORDER BY expression: $expression");
+            }
+        }
     }
     public function getById($table, $id, $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         return $this->run("SELECT * FROM $table WHERE id = ?", [$id])->fetch($fetchMode);
     }
     public function getByName($table, $name, $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
         return $this->run("SELECT * FROM $table WHERE name = ?", [$name])->fetch($fetchMode);
     }
 
     public function search($table, $search, $columns = null, $mode = 'OR', $fetchMode = PDO::FETCH_OBJ)
     {
+        $this->assertIdentifier($table);
+        $mode = strtoupper($mode);
+        if (!in_array($mode, ['AND', 'OR'], true)) {
+            throw new Exception("Invalid search mode: $mode");
+        }
+
         if (empty($search)) {
             return [];
         }
@@ -168,6 +213,7 @@ class Database
         $values = [];
 
         foreach ($columns as $column) {
+            $this->assertIdentifier($column);
             $whereClause[] = "$column LIKE ?";
             $values[] = "%$search%";
         }
@@ -190,6 +236,8 @@ class Database
 
     public function insert($table, $data)
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($data);
         $columns = implode(',', array_keys($data));
         $values = array_values($data);
         $placeholders = implode(',', array_fill(0, count($data), '?'));
@@ -197,13 +245,15 @@ class Database
         $this->run($query, $values);
 
         $this->Log("query: " . $query);
-        $this->Log("values: " . print_r($values, true));
 
         return $this->lastInsertId();
     }
 
     public function update($table, $data, $where)
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($data);
+        $this->assertDataKeys($where);
         $values = [];
 
         $fieldDetails = '';
@@ -227,6 +277,8 @@ class Database
 
     public function delete($table, $where, $limit = null)
     {
+        $this->assertIdentifier($table);
+        $this->assertDataKeys($where);
         $values = array_values($where);
         $whereDetails = '';
 
@@ -237,7 +289,7 @@ class Database
 
         $sql = "DELETE FROM $table WHERE $whereDetails";
         if (is_numeric($limit)) {
-            $sql .= " LIMIT $limit";
+            $sql .= ' LIMIT ' . (int) $limit;
         }
 
         $stmt = $this->run($sql, $values);
@@ -247,6 +299,7 @@ class Database
 
     public function deleteAll($table)
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
 
         return $stmt->rowCount();
@@ -254,23 +307,50 @@ class Database
 
     public function deleteById($table, $id)
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table WHERE id = ?", [$id]);
 
         return $stmt->rowCount();
     }
 
-    public function deleteByIds(string $table, string $column, string $ids)
+    public function deleteByIds(string $table, string $column, array $ids)
     {
-        $stmt = $this->run("DELETE FROM $table WHERE $column IN ($ids)");
+        $this->assertIdentifier($table);
+        $this->assertIdentifier($column);
+
+        if ($ids === []) {
+            return 0;
+        }
+
+        foreach ($ids as $id) {
+            if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
+                throw new Exception('Delete IDs must contain only integers.');
+            }
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->run("DELETE FROM $table WHERE $column IN ($placeholders)", array_values($ids));
 
         return $stmt->rowCount();
     }
 
     public function truncate($table)
     {
+        $this->assertIdentifier($table);
         $stmt = $this->run("DELETE FROM $table");
 
         return $stmt->rowCount();
+    }
+
+    private function assertDataKeys(array $data): void
+    {
+        if ($data === []) {
+            throw new Exception('Database data cannot be empty.');
+        }
+
+        foreach (array_keys($data) as $column) {
+            $this->assertIdentifier((string) $column);
+        }
     }
 
     protected function Log($message)

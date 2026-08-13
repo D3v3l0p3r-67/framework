@@ -24,6 +24,7 @@ class ApfType
         $this->session = new Session();
     }
 
+    #[Action]
     public function DataGrid($dataInput = null)
     {
         $formKind = 'DataGrid';
@@ -44,6 +45,7 @@ class ApfType
         );
     }
 
+    #[Action]
     public function Show($dataInput): Response
     {
         $id = $dataInput['id'];
@@ -67,6 +69,7 @@ class ApfType
         );
     }
 
+    #[Action]
     public function New($dataInput = null)
     {
         $dataInput = (object) ($dataInput ?? []);
@@ -127,24 +130,28 @@ class ApfType
         );
     }
 
+    #[Action]
     public function DeleteAndShowGrid($Data)
     {
         self::Delete($Data);
         return self::DataGrid();
     }
 
+    #[Action]
     public function InsertAndShowGrid($dataInput)
     {
         self::Insert($dataInput);
         return self::DataGrid();
     }
 
+    #[Action]
     public function UpdateAndShowGrid($dataInput)
     {
         self::Update($dataInput);
         return self::DataGrid();
     }
 
+    #[Action]
     public function Get($dataInput = null)
     {
         if (isset($dataInput['id'])) {
@@ -158,6 +165,7 @@ class ApfType
         );
     }
 
+    #[Action]
     public function Delete($dataInput)
     {
         if (isset($dataInput['id'])) {
@@ -171,6 +179,7 @@ class ApfType
         );
     }
 
+    #[Action]
     public function Insert($dataInput)
     {
         //$dataInput['user_id'] = $this->session->getUserId();
@@ -182,6 +191,7 @@ class ApfType
         );
     }
 
+    #[Action]
     public function Update($dataInput)
     {
         if (isset($dataInput['id'])) {

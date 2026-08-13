@@ -45,8 +45,21 @@ class Request
         return array(
             'accessToken' => $this->accessToken,
             'actionKey' => $this->actionKey,
-            'actionParameters' => $this->actionParameters
+            'actionParameters' => $this->redactSensitiveValues($this->actionParameters)
         );
+    }
+
+    private function redactSensitiveValues(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (is_string($key) && in_array(strtolower($key), ['password', 'token', 'csrf_token'], true)) {
+                $values[$key] = '[REDACTED]';
+            } elseif (is_array($value)) {
+                $values[$key] = $this->redactSensitiveValues($value);
+            }
+        }
+
+        return $values;
     }
 
     public function asJson()

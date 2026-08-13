@@ -4,7 +4,7 @@ $(document).ready(() => {
 });
 
 const Framework = (() => {
-    const ENDPOINT = 'https://dev.tittlus.com/framework/server/';
+    const ENDPOINT = '../server/';
     const DISPLAY_TIME = 4000;
     const TOAST_DISPLAY_LENGTH = 60000;
     const DISPLAY_KINDS = ['error', 'user'];
@@ -321,16 +321,35 @@ const Framework = (() => {
         constructor(endpoint, tabManager) {
             this.endpoint = endpoint;
             this.tabManager = tabManager;
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || null;
         }
 
         sendRequestAndProcessResponse(request, target = null) {
-            $.post(this.endpoint, { request: request })
-                .done((response) => {
+            $.ajax({
+                url: this.endpoint,
+                method: 'POST',
+                data: { request },
+                headers: this.csrfToken ? { 'X-CSRF-Token': this.csrfToken } : {}
+            })
+                .done((response, textStatus, jqXHR) => {
+                    this._captureCsrfToken(jqXHR);
                     this._handleResponse(response, target);
                 })
                 .fail((jqXHR, textStatus, errorThrown) => {
+                    this._captureCsrfToken(jqXHR);
+                    if (jqXHR.responseJSON) {
+                        this._handleResponse(jqXHR.responseJSON, target);
+                        return;
+                    }
                     ConsoleLogger.log(`Network error: ${textStatus}`, 'error');
                 });
+        }
+
+        _captureCsrfToken(jqXHR) {
+            const token = jqXHR.getResponseHeader('X-CSRF-Token');
+            if (token) {
+                this.csrfToken = token;
+            }
         }
 
         _handleResponse(response, target) {

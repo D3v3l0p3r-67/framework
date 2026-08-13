@@ -9,6 +9,7 @@ class Joke extends DataBaseTableAction
         $this->table = 'doc_joke';
     }
     //todo: Self => this. Self samo za klic statičnih metod znotraj razreda.
+    #[Action]
     public function DeleteAndShowGrid($Data)
     {
         self::Delete($Data);
@@ -16,12 +17,14 @@ class Joke extends DataBaseTableAction
     }
 
     //TODO: Pass different Message
+    #[Action]
     public function InsertAndShowGrid($dataInput)
     {
         self::Insert($dataInput);
         return self::Grid();
     }
 
+    #[Action]
     public function UpdateAndShowGrid($dataInput)
     {
         self::Update($dataInput);
@@ -103,6 +106,7 @@ class Joke extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function Grid()
     {
         return ResponseFactory::CreateOk(
