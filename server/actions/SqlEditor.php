@@ -13,6 +13,7 @@ class SqlEditor extends DataBaseAction
         parent::__construct();
     }
 
+    #[Action]
     public function Show($dataInput)
     {
         $name = "SqlEditor.Show";
@@ -43,6 +44,7 @@ class SqlEditor extends DataBaseAction
         );
     }
 
+    #[Action]
     public function ExecuteQuery($dataInput)
     {
         $query = $dataInput['query'];
@@ -64,6 +66,7 @@ class SqlEditor extends DataBaseAction
         );
     }
 
+    #[Action]
     public function GetAllTablesInDatabase()
     {
         $query = "SELECT name as 'Table name'

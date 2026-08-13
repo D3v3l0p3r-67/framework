@@ -10,6 +10,7 @@ class PriceList extends DataBaseTableAction
     }
 
     //access by Pk or Fk
+    #[Action]
     public function Show($dataInput)
     {
         //New or Edit: Todo rename method!
@@ -101,6 +102,7 @@ class PriceList extends DataBaseTableAction
             )
         );
     }
+    #[Action]
     public function Upsert($data)
     {
         if ($data['id']) {

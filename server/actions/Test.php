@@ -11,7 +11,8 @@ class Test extends DataBaseTableAction
         $this->table = 'doc_test';
     }
 
-    
+
+    #[Action]
     public function Report()
     {
         header('Content-Type: application/pdf');
@@ -60,6 +61,7 @@ class Test extends DataBaseTableAction
     }
 
 
+    #[Action]
     public function Grid()
     {
         return ResponseFactory::CreateOk(
@@ -84,9 +86,9 @@ class Test extends DataBaseTableAction
                         )
                     ),
                 template:  '<a href="https://dev.tittlus.com/framework/server/?actionKey=Test.Report" target="_blank"> Report </a>
-                            <iframe id="pdf-viewer" src="https://dev.tittlus.com/framework/server/?actionKey=Test.Report" 
-                                    width="300px" 
-                                    height="600px" 
+                            <iframe id="pdf-viewer" src="https://dev.tittlus.com/framework/server/?actionKey=Test.Report"
+                                    width="300px"
+                                    height="600px"
                                     style="border: none;">
                             </iframe>
                             <div class="row">
@@ -123,12 +125,14 @@ class Test extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function InsertAndShowGrid($dataInput)
     {
         $this->Insert($dataInput);
         return $this->Grid();
     }
 
+    #[Action]
     public function New()
     {
         return ResponseFactory::CreateOk(

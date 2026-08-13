@@ -15,12 +15,14 @@ class DataBaseTableSessionAction extends DataBaseTableAction
         $this->session = new Session();
     }
 
+    #[Action]
     public function Insert($data)
     {
         $data['user_id'] = $this->session->getUserId();
         parent::Insert($data);
     }
 
+    #[Action]
     public function Update($data)
     {
         $data['user_id'] = $this->session->getUserId();

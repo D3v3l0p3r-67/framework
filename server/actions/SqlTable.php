@@ -12,6 +12,7 @@ class SqlTable extends DataBaseAction
         parent::__construct();
     }
 
+    #[Action]
     public function Show($dataInput)
     {
         $name =  $dataInput['name'];
@@ -33,6 +34,7 @@ class SqlTable extends DataBaseAction
         );
     }
 
+    #[Action]
     public function Grid($dataInput)
     {
         $search = $dataInput['search'] ?? '';

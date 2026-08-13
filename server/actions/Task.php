@@ -14,24 +14,28 @@ class Task extends DataBaseTableAction
         $this->table = 'doc_task';
     }
 
+    #[Action]
     public function DeleteAndShowGrid($Data)
     {
         self::Delete($Data);
         return self::DataGrid();
     }
 
+    #[Action]
     public function InsertAndShowGrid($dataInput)
     {
         self::Insert($dataInput);
         return self::DataGrid();
     }
 
+    #[Action]
     public function UpdateAndShowGrid($dataInput)
     {
         self::Update($dataInput);
         return self::DataGrid();
     }
 
+    #[Action]
     public function DataGrid()
     {
         $data = $this->db->getAll($this->table, 'id desc');
@@ -132,6 +136,7 @@ class Task extends DataBaseTableAction
      * @param mixed $dataInput
      * @return Response
      */
+    #[Action]
     public function Show($dataInput): Response
     {
         $id = $dataInput['id'];
@@ -198,6 +203,7 @@ class Task extends DataBaseTableAction
      * /
      * @return Response
      */
+    #[Action]
     public function New()
     {
         return ResponseFactory::CreateOk(
@@ -356,6 +362,7 @@ class Task extends DataBaseTableAction
 
 
 
+    #[Action]
     public function Report($dataInput)
     {
         $id = $dataInput['id'];

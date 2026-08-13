@@ -9,6 +9,7 @@ class Designer extends DataBaseTableSessionAction
         $this->table = 'doc_designer';
     }
 
+    #[Action]
     public function List()
     {
         $products = $this->db->get($this->table, "id, name, preview");
