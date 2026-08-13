@@ -3,14 +3,18 @@ require_once('./core/ResponseFactory.php');
 require_once('./core/Response.php');
 require_once('./core/Authenticator.php');
 require_once('./actions/User.php');
+require_once('./core/HttpException.php');
 
+use Framework\Core\Logger;
+use Framework\Core\LogLevel;
+
+#[Attribute(Attribute::TARGET_METHOD)]
 class Action
 {
     public static function Execute($accessToken, $actionKey, $actionParameters)
     {
         if (substr_count($actionKey, '.') !== 1) {
-            throw new Exception("Action key '$actionKey' is not in correct format.");
-            exit();
+            throw new HttpException("Action key '$actionKey' is not in correct format.", 400);
         }
 
         $actionKeyArray = explode('.', $actionKey);
@@ -20,23 +24,27 @@ class Action
         $fileName = './actions/' . $className . '.php';
 
         if (!file_exists($fileName)) {
-            throw new Exception("Class file '$fileName' does not exists.");
-            exit();
+            throw new HttpException("Action '$actionKey' was not found.", 404);
         }
 
         require_once($fileName);
 
         if (!class_exists($className)) {
-            throw new Exception("Class '$className' does not exists.");
-            exit();
+            throw new HttpException("Action '$actionKey' was not found.", 404);
         }
 
         $instance = new $className;
 
         if (!method_exists($instance, $methodName)) {
-            throw new Exception("Method '$methodName' does not exists in class '$className'.");
-            exit();
+            throw new HttpException("Action '$actionKey' was not found.", 404);
         }
+
+        $method = new ReflectionMethod($instance, $methodName);
+        if (!$method->isPublic()) {
+            throw new HttpException("Action '$actionKey' was not found.", 404);
+        }
+
+        self::AssertExposedAction($method, $actionKey);
 
         if ( self::IsLoginActionKey($actionKey) || User::IsAdministrator() || Authenticator::isAuthorized($actionKey)) {
             return call_user_func_array(array($instance, $methodName), $actionParameters);
@@ -45,6 +53,26 @@ class Action
             //ResponseFactory::CreateForbiden()->send();
             //exit();
         }
+    }
+
+    private static function AssertExposedAction(ReflectionMethod $method, string $actionKey): void
+    {
+        if ($method->getAttributes(self::class) !== []) {
+            return;
+        }
+
+        $config = file_exists('./config.local.php') ? require './config.local.php' : [];
+        $auditMode = filter_var(
+            $config['app']['action_audit'] ?? (getenv('ACTION_AUDIT') ?: false),
+            FILTER_VALIDATE_BOOL
+        );
+
+        if ($auditMode) {
+            Logger::Write("Unattributed action executed in audit mode: $actionKey", LogLevel::WARNING);
+            return;
+        }
+
+        throw new HttpException("Action '$actionKey' was not found.", 404);
     }
     private static function IsLoginActionKey($actionKey)
     {

@@ -45,8 +45,10 @@ class ResponseFactory
         );
     }
 
-    public static function CreateError(int $code, MessageArray $messages = null, mixed $data = [], mixed $form = '', bool $toCache = false)
+    public static function CreateError(int $code, ?MessageArray $messages = null, mixed $data = [], mixed $form = '', bool $toCache = false)
     {
+        $messages = $messages ?? new MessageArray();
+
         return new Response(
             success: false,
             httpStatusCode: $code,
@@ -58,7 +60,7 @@ class ResponseFactory
         );
     }
 
-    public static function CreateOk(Message $message = null, mixed $data = [], mixed $form = '', bool $toCache = false, $refresh = false)
+    public static function CreateOk(?Message $message = null, mixed $data = [], mixed $form = '', bool $toCache = false, $refresh = false)
     {
         $code = 200;
         $messages = self::GetMessages($code, $message);
@@ -66,20 +68,30 @@ class ResponseFactory
         return self::CreateSuccess($code, $messages, $data, $form, $toCache, $refresh);
     }
 
-    public static function CreateBadRequest(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateBadRequest(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 400;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    public static function CreateUnauthorized(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateUnauthorized(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 401;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
     public static function CreateForbiden(?MessageUser $message = null, mixed $data = [], bool $toCache = false)
@@ -87,42 +99,67 @@ class ResponseFactory
         $code = 403;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    public static function CreateNotFound(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateNotFound(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 404;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    public static function CreateMethodNotAllowed(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateMethodNotAllowed(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 405;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    public static function CreateConflict(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateConflict(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 409;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    public static function CreateInternalServerError(Message $message = null, mixed $data = [], bool $toCache = false)
+    public static function CreateInternalServerError(?Message $message = null, mixed $data = [], bool $toCache = false)
     {
         $code = 500;
         $messages = self::GetMessages($code, $message);
 
-        return self::CreateError($code, $messages, $data, $toCache);
+        return self::CreateError(
+            code: $code,
+            messages: $messages,
+            data: $data,
+            toCache: $toCache
+        );
     }
 
-    private static function GetMessages(int $code, Message $message = null)
+    private static function GetMessages(int $code, ?Message $message = null)
     {
         $messages = new MessageArray();
 

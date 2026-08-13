@@ -9,6 +9,7 @@ class ApplicationMenu extends DataBaseTableAction
         $this->table = 'fw_application_menu';
     }
 
+    #[Action]
     public function Test()
     {
         return ResponseFactory::CreateOk(
@@ -24,6 +25,7 @@ class ApplicationMenu extends DataBaseTableAction
         );
     }
 
+    #[Action]
     public function Grid()
     {
         return ResponseFactory::CreateOk(

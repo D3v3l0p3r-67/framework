@@ -11,6 +11,7 @@ class DataBaseTableAction extends DataBaseAction
         parent::__construct();
     }
 
+    #[Action]
     public function Get($data = null)
     {
         if (isset($data['id'])) {
@@ -24,6 +25,7 @@ class DataBaseTableAction extends DataBaseAction
         );
     }
 
+    #[Action]
     public function Delete($data)
     {
         if (isset($data['id'])) {
@@ -37,6 +39,7 @@ class DataBaseTableAction extends DataBaseAction
         );
     }
 
+    #[Action]
     public function Insert($data)
     {
         $id = $this->db->insert($this->table, $data);
@@ -47,6 +50,7 @@ class DataBaseTableAction extends DataBaseAction
         );
     }
 
+    #[Action]
     public function Update($data)
     {
         if (isset($data['id'])) {

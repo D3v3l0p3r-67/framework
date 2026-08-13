@@ -18,6 +18,7 @@ class User
         $this->session = new Session();
     }
 
+    #[Action]
     public function Logout()
     {
         $session = new Session();
@@ -47,6 +48,7 @@ class User
         return $isAdmin;
     }
 
+    #[Action]
     public function GetData()
     {
         /*
@@ -67,6 +69,7 @@ class User
         );
     }
 
+    #[Action]
     public function Login($data)
     {
         if (Authenticator::isAuthenticated()) {
@@ -76,8 +79,8 @@ class User
                 data: $this->GetDataFromSession()
             );
         } else {
-            $username = $data['username'];
-            $password = $data['password'];
+            $username = $data['username'] ?? null;
+            $password = $data['password'] ?? null;
 
             if (
                 isset($username) && !empty($username) &&
@@ -86,15 +89,15 @@ class User
                 $user =  $this->db->row(
                     'SELECT * 
                     FROM fw_user 
-                    WHERE username = ? and 
-                        password = ?',
-                    [$username, $password]
+                    WHERE username = ?',
+                    [$username]
                 );
 
-                if ($user) {
+                if ($user && password_verify($password, $user->password)) {
                     //$token = Utils::generateGuid();
                     //$expired =  (new DateTime())->add(new DateInterval('P1D')); //+1day
 
+                    $this->session->regenerateId();
                     $this->session->setUserId($user->id);
                     $this->session->setUsername($user->username);
                     $this->session->setEmail($user->email);
@@ -128,6 +131,7 @@ class User
         );
     }
 
+    #[Action]
     public function Profile()
     {
         $user_id =  $this->session->getUserId();

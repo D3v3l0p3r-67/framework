@@ -192,7 +192,7 @@ class Form implements JsonSerializable
         $this->target = $target;
     }
 
-    public static function Get(string $title = null, string $href = null, MenuEntryArray $menu = null, string $template = null, string $target = 'main')
+    public static function Get(?string $title = null, ?string $href = null, ?MenuEntryArray $menu = null, ?string $template = null, string $target = 'main')
     {
         $title = $title ?? '';
         $href = $href ?? '';

@@ -2,6 +2,9 @@
 
 require_once('./core/Message.php');
 require_once('./core/Form.php');
+require_once('./core/Session.php');
+
+use Framework\Core\Session;
 
 class Response implements JsonSerializable
 {
@@ -39,18 +42,15 @@ class Response implements JsonSerializable
 
     public function SendAsJson()
     {
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type");
-
         header('Content-type: application/json;charset=utf-8');
+        header('X-CSRF-Token: ' . (new Session())->getCsrfToken());
 
         if ($this->toCache == true) {
             header('Cache-control: max-age=60');
         } else {
             header('Cache-control: no-cache, no-store');
         }
-        http_response_code(200);
+        http_response_code($this->httpStatusCode);
 
         echo json_encode($this);
     }
